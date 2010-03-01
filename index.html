@@ -421,12 +421,12 @@ var JSMM = {
 	if(vis) for(var index in nodes) nodes[index].elem.hide();
 	nodes['0'].updateHeight();
 	nodes['0'].x = 20;
-	nodes['0'].y = 40 + 32; //Math.max(30, $('#graphBox').height()/2-nodes['0'].height/2);
+	nodes['0'].y = 40 + 44; //Math.max(30, $('#graphBox').height()/2-nodes['0'].height/2);
 	nodes['0'].updateCSS();
 	Node.width = 0
 	nodes['0'].updatePositions();
 	// update size
-	var h = Math.max(nodes['0'].height + 40 + 40 + 32, 300);
+	var h = Math.max(nodes['0'].height + 40 + 40 + 44, 300);
 	var w = Math.max(Node.width+40, 300);
 	$('#graphCanvas').attr('height', h).attr('width', w);
 	$('#graphBox').css({height: h, width: w});
@@ -530,7 +530,7 @@ var JSMM = {
 	JSMM.updatePositions();
 	return false;
     },
-    selectFileUpdate : function(){
+    selectFileUpdate : function(cont){
 	var service = new google.gdata.client.GoogleService(serviceName, serviceVersion);
 	doLogin(scope);
 	service.getFeed(scope + 'spreadsheets/private/full/', function(response){
@@ -544,12 +544,19 @@ var JSMM = {
 		html.push('<option value="' + id + '")>' + title);
 	    }
 	    $('#docSelect')[0].innerHTML = html.join('');  
+	    if(cont) cont();
 	}, defaultErrorHandler);
     },
     selectFile : function(){
-	JSMM.selectFileUpdate();
 	var pos = $('#openButton').position();
-	$('#docSelect').css({left:pos.left, top:pos.top}).show().focus();
+	var token = google.accounts.user.checkLogin(s);
+	if(!token){
+	    JSMM.selectFileUpdate(function(){
+		$('#docSelect').css({left:pos.left, top:pos.top}).show().focus();
+	    });
+	}else{
+	    $('#docSelect').css({left:pos.left, top:pos.top}).show().focus();
+	}
     },
     selectFileEnd : function(e){
 	$('#docSelect').hide();
