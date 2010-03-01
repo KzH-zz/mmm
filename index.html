@@ -421,12 +421,12 @@ var JSMM = {
 	if(vis) for(var index in nodes) nodes[index].elem.hide();
 	nodes['0'].updateHeight();
 	nodes['0'].x = 20;
-	nodes['0'].y = 40; //Math.max(30, $('#graphBox').height()/2-nodes['0'].height/2);
+	nodes['0'].y = 40 + 32; //Math.max(30, $('#graphBox').height()/2-nodes['0'].height/2);
 	nodes['0'].updateCSS();
 	Node.width = 0
 	nodes['0'].updatePositions();
 	// update size
-	var h = Math.max(nodes['0'].height + 40 + 40, 300);
+	var h = Math.max(nodes['0'].height + 40 + 40 + 32, 300);
 	var w = Math.max(Node.width+40, 300);
 	$('#graphCanvas').attr('height', h).attr('width', w);
 	$('#graphBox').css({height: h, width: w});
