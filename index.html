@@ -1,1 +1,1203 @@
-My GitHub Page
+<head>
+<meta name="viewport" content="width=device-width"/>
+<style type="text/css">
+.s {
+    border:2px solid #CCCCFF;
+    position: absolute;
+    -webkit-border-radius: 8;
+}
+/* icon */
+.icon {
+border: 0px;
+height:36px;
+overflow:hidden;
+}
+.icon24 {
+border: 0px;
+height:24px;
+overflow:hidden;
+}
+.iconB1 {
+position:absolute;
+border:0px;
+left:0;top:0;
+height:36;width:36;
+opacity:0.01;
+}
+.iconB0 {
+position:relative;
+height:36px;
+overflow:hidden;
+}
+.iadd   {margin-top:-72px;  width:36px; height:3672px;}
+.iedit  {margin-top:-2124px;width:36px; height:3672px;} 
+.iicon  {margin-top:-2952px;width:36px; height:3672px;}
+.ileft  {margin-top:-1764px;width:36px; height:3672px;}
+.iinfo  {margin-top:-1620px;width:36px; height:3672px;}
+.itoggle{margin-top:-2268px;width:36px; height:3672px;}
+.icross{margin-top:-3024px;width:36px; height:3672px;}
+.iremove{margin-top:-792px;width:36px; height:3672px;} /*minus*/
+.irecycle{margin-top:-2628px;width:36px; height:3672px;}
+.inside {
+    padding-left:4px;
+    padding-right:4px;
+    vertical-align: middle;
+}
+.popup {
+    position:absolute;
+    top: 10%;
+    left 10%;
+    display: none;
+}
+.transp {
+    filter: alpha(opacity=60); opacity: 0.6;
+}
+.transp8 {
+    filter: alpha(opacity=80); opacity: 0.8;
+}
+div.lmenuBox {
+    position: absolute;
+    left:2%; top:0%;
+    width:90%;
+}
+div.rmenuBox {
+    position: absolute;
+    right:2%; top:0%;
+}
+#root{
+}
+#graphBoxWrap {
+    position:absolute;
+    left:0%; top:0%;
+    width:100%; height:100%;
+    //overflow: auto;
+}
+#graphBox {
+    position:absolute;
+    background:#FFFFFF;
+    /*background: #EEEEEE;*/
+    width:100%;
+    height:100%;
+    /*!overflow: auto;*/
+}
+#graphCanvas{
+    position: absolute;
+}
+#graph {
+    position: absolute;
+    left:0%; top:0%;
+    width:100%; height:100%;
+}
+div.dialog {
+    position:fixed;
+    background: #BBBBBB;
+    filter: alpha(opacity=80); opacity: 0.8;
+    left:0%; top:0%;
+    width:100%; height:100%;
+}
+div.dialogWrap {
+    position:relative;
+    left:10%; top:5%;
+}
+div.dialogContent {
+    position:relative;
+    border: 1px solid #666666;
+    background: #EEEEEE;
+    filter: alpha(opacity=10); opacity: 1.0;
+    left: -1px; top: -1px;
+    width:80%; height:90%;
+    overflow: auto;
+}
+div.dialogTitle{
+    background: #DDDDDD;
+    padding: 2px
+}
+div.dialogMain{
+    padding: 2px;
+}
+div.dialogButton {
+    position: absolute;
+    top: 0px; right: 0px;
+}
+.dialog{
+    display: none;
+}
+.hide{
+    display: none;
+}
+</style>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('gdata', '2.x');
+function onGoogleDataLoad() {
+}
+google.setOnLoadCallback(onGoogleDataLoad);
+</script>
+<script language="javascript"><!--
+google.load("jquery", "1.4.2");
+
+if(!window['console']){
+    console = {};
+    console.log = function(){};
+}
+// Old WebKit workaround.
+var defaultBody = '';
+//(function(){
+//    var match = /AppleWebKit\/([0-9]+)/.exec(navigator.appVersion);
+//    if(match && parseInt(match[1])<=531) defaultBody = '.'
+//})();
+
+// debug utilities
+function loga(args){
+    console.log(/function\s+([\w0-9\_]+)/.exec(args.callee)[1]+'('+Array.prototype.join.call(args,', ')+').');
+}
+function defaultErrorHandler(error){
+    console.log('error:', error);
+}
+Array.prototype.map = function(fn){
+    var result = []
+    for(var i=0; i<this.length; ++i) result.push(fn(this[i]));
+    return result;
+}
+Array.prototype.each = function(fn){
+    for(var i=0; i<this.length; ++i) fn(this[i]);
+}
+
+// global attrs
+var serviceName = 'jsmm'
+var serviceVersion = 'jsmm-0.1'
+var docsScope = 'http://docs.google.com/feeds/'
+var scope = 'http://spreadsheets.google.com/feeds/'
+
+// authentication
+function doLogin(s){
+    var token = google.accounts.user.checkLogin(s);
+    if(!token) token = google.accounts.user.login(s)
+    console.log(s, token);
+}
+function doLogout(){
+    google.accounts.user.logout();
+}
+
+// feed util
+function findLink(links, re, callback){
+    for(var j=0, link; link = links[j]; ++j){
+	if(re.exec(link.rel)) return link;
+    }
+}
+
+// DB access
+var DB = {
+    createTable : function (service, tablesfeed, continuation) {
+	console.log(arguments);
+	var createTable = {
+	    xmlns: "http://www.w3.org/2005/Atom",
+	    xmlns$gs: "http://schemas.google.com/spreadsheets/2006",
+	    title: { $t : "Table 1", type:'text' },
+	    gs$worksheet: { name:'Sheet 1' },
+	    gs$header: { row:'1' },
+	    gs$data: {
+		numRows:'0',
+		startRow:'2',
+		gs$column: [{ index:'A', name:'body' },
+			    { index:'B', name:'attr' }]
+	    },
+	};
+	doLogin(scope);
+	service.insertEntry(tablesfeed,
+			    createTable,
+			    function(resp){
+				console.log("createTable:", resp);
+				continuation(resp.entry.content.src);
+			    }, defaultErrorHandler);
+    },
+    createNewDocument : function(title, continuation){
+	var newEntry = {
+	    xmlns:"http://www.w3.org/2005/Atom",
+	    category: { scheme: "http://schemas.google.com/g/2005#kind",
+			term: "http://schemas.google.com/docs/2007#spreadsheet" },
+	    title: { $t: title, type: "text" },
+	};
+	var service = new google.gdata.client.GoogleService(serviceName, serviceVersion);
+	doLogin(docsScope);
+	service.insertEntry(docsScope + 'documents/private/full/', newEntry,
+			    function(entryRoot){
+				console.log("newEntry:", entryRoot);
+				DB.createTable(service,
+					       findLink(entryRoot.entry.link, /#tablesfeed/).href,
+					       continuation);
+			    }, defaultErrorHandler);
+    },
+    /// * load records and create nodes
+    loadRecords : function(href, cont){
+	var service = new google.gdata.client.GoogleService(serviceName, serviceVersion);
+	service.getFeed(href, function(records){
+	    console.log('records', records);
+	    if(records.feed){
+		cont(href, records.feed);
+	    }
+	}, defaultErrorHandler);
+    },
+    loadTable: function(sheetId, cont){
+	var service = new google.gdata.client.GoogleService(serviceName, serviceVersion);
+	doLogin(scope);
+	service.getFeed(scope + sheetId + '/tables/',
+			function(response){
+			    console.log('tablesfeeds', response);
+			    DB.loadRecords(response.feed.entry[0].content.src, cont);
+			}, defaultErrorHandler);
+    }
+};
+
+// Editor IF
+var JSMM = {
+    createNewDocument : function(title) {
+	//JSMM.showDialog('Opening New Document ...');
+	// create new doc, create table
+	DB.createNewDocument(title, function(recordfeeds){
+	    JSMM.createRoot();
+	    JSMM.recordfeeds = recordfeeds;
+	    JSMM.showNodes();
+	    JSMM.updatePositions();
+	    //JSMM.hideDialog();
+	});
+    },
+    saveAsNewDocument : function(title){
+	title = title || window.prompt("Are you sure to save as a new document ?", "NewDocument");
+	if(title){
+	    DB.createNewDocument(title, function(recordfeeds){
+		for(var i in nodes){
+		    nodes[i].record = null;
+		}
+		JSMM.recordfeeds = recordfeeds;
+		//save();
+	    });
+	}
+    },
+    createRoot : function(body){
+	var root = new Node('0');
+	root.body = body || 'root';
+	nodes = {'0': root};
+    },
+    createSample : function(){
+	var n1 = new Node('1'); n1.body = 'n1'; n1.parent = '0';
+	var n2 = new Node('2'); n2.body = 'n2'; n2.parent = '0';
+	nodes['0'].children = ['1', '2'];
+	nodes['1'] = n1;
+	nodes['2'] = n2;
+    },
+    openDocument : function(sheetId) {
+	JSMM.showDialog('Loading ...');
+	DB.loadTable(sheetId, function(recordfeeds, feed){
+	    JSMM.hideDialog();
+	    JSMM.recordfeeds = recordfeeds
+	    console.log('recordfeeds', JSMM.recordfeeds);
+	    nodes = {}; /// TODO: avaid direct manupilation ?
+	    // build nodes
+	    if(feed.entry){
+		for(var i=0, entry; entry = feed.entry[i]; ++i){
+		    field = function(name){
+			for(var i=0, f; f=entry['gs$field'][i]; ++i) if(f.name==name) return f['$t'];
+			return "";
+		    }
+		    //var attr = JSON.parse(field("attr"));
+		    var attr = eval('(' + field("attr") + ')');
+		    console.log(attr);
+		    var node = new Node(attr.node);
+		    node.body = field("body");
+		    node.children = attr.children;
+		    node.icons = attr.icons;
+		    node.storeRecord(entry);
+		}
+		// connect parent
+		for(var i in nodes){
+		    nodes[i].eachChild(function(child){
+			child.parent = i;
+		    });
+		}
+	    }else{
+		// empty document
+		JSMM.createRoot();
+	    }
+	    JSMM.showNodes();
+	    // icon
+	    for(var i in nodes){
+		nodes[i].updateIcons();
+	    }
+	    JSMM.updatePositions();
+	});
+    },
+    // save
+    offlineMode : false,
+    save : function(){
+	console.log('save', JSMM.recordfeeds);
+	if (!JSMM.recordfeeds) {
+	    JSMM.saveAsNewDocument();
+	    return;
+	}
+	var service = new google.gdata.client.GoogleService(serviceName, serviceVersion);
+	doLogin(scope);
+
+	var status = {}
+	for(var i in nodes){
+	    var node = nodes[i];
+	    var elem = $('#s'+i);
+	    var body = elem.children('.inside')[0].innerHTML;
+	    if(!node.record){
+		status[i] = false;
+		//console.log('new', node);
+	    }else if (node.changed(body)) {
+		status[i] = false;
+		//console.log('changed', node, node.recordAttr, node.serializeAttr());
+	    }else{
+		//console.log('unchanged', node);
+	    }
+	}
+	var checkAndFin = function(){
+	    var done = true;
+	    for(var j in status) if(!status[j]) done = false;
+	    if(done){
+		// error check
+	    }
+	}
+	for(var i in status){
+	    var node = nodes[i];
+	    var elem = $('#s'+node.node);
+	    var body = elem.children('.inside')[0].innerHTML;
+	    if(!node.record){
+		console.log('to save new record', node)
+		// save new record
+		var newRecord = {
+		    xmlns: "http://www.w3.org/2005/Atom",
+		    xmlns$gs: "http://schemas.google.com/spreadsheets/2006",
+		    gs$field: [{ name: "body", $t: body },
+			       { name: "attr", $t: node.serializeAttr() }],
+		};
+		(function(nodeId){
+		    service.insertEntry(JSMM.recordfeeds, newRecord, function(entryRoot){
+			console.log("newRecord:", nodeId, entryRoot);
+			status[nodeId] = entryRoot;
+			// update record (link, etag)
+			nodes[nodeId].storeRecord(entryRoot.entry);
+			checkAndFin();
+		    }, function(e){
+			status[i] = e;
+		    });
+		})(i);
+	    }else{
+		// save updated nodes
+		if (node.changed(body)) {
+		    console.log('to save updated record', node)
+		    var record = {
+			xmlns: "http://www.w3.org/2005/Atom",
+			xmlns$gd: "http://schemas.google.com/g/2005",
+			xmlns$gs: "http://schemas.google.com/spreadsheets/2006",
+			gd$etag: node.record['gd$etag'],
+			gs$field: [{ name: "body", $t: body },
+				   { name: "attr", $t: node.serializeAttr() }],
+		    };
+		    (function(nodeId){
+			var editfeeds = findLink(node.record.link, /edit/).href;
+			console.log('editfeed', editfeeds, node.record);
+			service.updateEntry(editfeeds, record, function(entryRoot){
+			    console.log("record:", nodeId, entryRoot);
+			    status[nodeId] = entryRoot;
+			    nodes[nodeId].storeRecord(entryRoot.entry);
+			    checkAndFin();
+			}, function(e){
+			    console.log("error", nodeId, e);
+			    status[i] = e;
+			});
+		    })(i);
+		}
+	    }
+	}
+    },
+    // view
+    updateElem : function(){
+	for(var index in nodes) nodes[index].updateElem();
+    },
+    updatePositions : function(vis){
+	if(vis) for(var index in nodes) nodes[index].elem.hide();
+	nodes['0'].updateHeight();
+	nodes['0'].x = 20;
+	nodes['0'].y = 40; //Math.max(30, $('#graphBox').height()/2-nodes['0'].height/2);
+	nodes['0'].updateCSS();
+	Node.width = 0
+	nodes['0'].updatePositions();
+	// update size
+	var h = Math.max(nodes['0'].height + 40 + 40, 300);
+	var w = Math.max(Node.width+40, 300);
+	$('#graphCanvas').attr('height', h).attr('width', w);
+	$('#graphBox').css({height: h, width: w});
+	//$('#graphBoxWrap').css({height: h, width: w});
+	JSMM.drawCanvas();
+    },
+    // event handling
+    handleKeyForNode : function(e){
+	var code = e.which;
+	var node = nodes[/s([0-9]+)/.exec(e.currentTarget.id)[1]];
+	//$('.bottomBox')[0].innerHTML = code + ' ' + e.altKey.toString();
+	var shift = 10000;
+	var ctrl = 100000;
+	var alt = 1000000;
+	var code = code + (e.ctrlKey ? ctrl : 0) + (e.shiftKey ? shift : 0) + (e.altKey ? alt : 0)
+	console.log('code', code);
+	switch(code){
+	case 13: // return ... add a sibling.
+	case ctrl+74: // 'j'
+	case ctrl+75: // 'k'
+	    var c = node.addSibling(code==ctrl+75 ? -1:1);
+	    if(c){
+		c.updateElem();
+		JSMM.updatePositions();
+		c.focus();
+	    }
+	    return false;
+	case ctrl+9: // tab ... add a child
+	case ctrl+76: // 'l'
+	    var c = node.addChild().updateElem();
+	    JSMM.updatePositions();
+	    c.focus();
+	    return false;
+	case ctrl+32: // space
+	    node.toggleChildren();
+	    JSMM.updatePositions();
+	    return false;
+	case alt+37: // left
+	case alt+72:
+	    try{node.getParent().focus();}catch(e){};
+	    return false;
+	case alt+39: // right
+	case alt+76:
+	    try{node.getChild(0).focus();}catch(e){};
+	    return false;
+	case alt+38: // up
+	case alt+75:
+	    try{(node.getSibling(-1) ||
+		 node.getParent().getSibling(-1).getChild(-1) ||
+		 node.getParent().getSibling(-1)).focus();
+	       }catch(e){};
+	    return false;
+	case alt+40: // down
+	case alt+74:
+	    try{(node.getSibling(1) ||
+		 node.getParent().getSibling(1).getChild(0) ||
+		 node.getParent().getSibling(1)).focus();
+	       }catch(e){};
+	    return false;
+	case alt+32: // space
+	case ctrl+32:
+	    node.toggleChildren();
+	    JSMM.updatePositions();
+	    return false;
+	case alt+8: // delete
+	case ctrl+8:
+	    node.remove();
+	    JSMM.updatePositions();
+	    return false;
+	case ctrl+shift+73: // i ... icon 
+	    node.addIcon(45);
+	    return false;
+	default:
+	    console.log(e, code);
+	    JSMM.updatePositions();
+	    return true;
+	}
+    },
+    popupSize : 36, // icon size
+    hidePopup : function(){
+	if(JSMM.popup){
+	    JSMM.popup.hide();
+	    JSMM.popup = null;
+	}
+    },
+    handleBgTouch : function(){
+	JSMM.hidePopup();
+    },
+    handleClickIcon : function(e){
+	JSMM.hidePopup();
+	var popup = JSMM.popup = $('#iconPopup');
+	popup.css({left:e.pageX-popup.width()/2, top:e.pageY-popup.height()/2});
+	popup.show();
+	JSMM.popupTarget = nodes[/s([0-9]+)/.exec($(e.currentTarget).parents('tr.s')[0].id)[1]];
+	JSMM.popupTargetIcon = $(e.currentTarget).parent().prevAll().length;
+	return false;
+    },
+    removeIcon : function(){
+	JSMM.hidePopup();
+	JSMM.popupTarget.removeIcon(JSMM.popupTargetIcon);
+	JSMM.updatePositions();
+	return false;
+    },
+    selectFileUpdate : function(){
+	var service = new google.gdata.client.GoogleService(serviceName, serviceVersion);
+	doLogin(scope);
+	service.getFeed(scope + 'spreadsheets/private/full/', function(response){
+	    console.log("spreadsheets", response);
+	    var entries = response.feed.entry;
+	    if (!entries.length) return;
+	    var html = ["<option>New Document ..."];
+	    for (var i = 0, entry; entry = entries[i]; i++) {
+		var title = entry.title.$t;
+		id = /worksheets\/([^\/]+)/.exec(findLink(entry.link, /#worksheetsfeed/).href)[1]
+		html.push('<option value="' + id + '")>' + title);
+	    }
+	    $('#docSelect')[0].innerHTML = html.join('');  
+	}, defaultErrorHandler);
+    },
+    selectFile : function(){
+	var pos = $('#openButton').position();
+	$('#docSelect').css({left:pos.left, top:pos.top}).show().focus();
+    },
+    selectFileEnd : function(e){
+	$('#docSelect').hide();
+	if(e.selectedIndex==0){
+	    var r = window.prompt("Are you sure to open a new document ?", "NewDocument");
+	    if(r)JSMM.createNewDocument(r.toString());
+	}else{
+	    console.log(e[e.selectedIndex])
+	    var r = window.confirm("Are you sure to open '"+e[e.selectedIndex].innerText+"'");
+	    JSMM.openDocument(e[e.selectedIndex].value);
+	}
+    },
+    selectIcon : function(){
+	JSMM.hidePopup();
+	var target = target || JSMM.popupTarget;
+	$('#iconSelect')[0].selectedIndex = JSMM.popupTarget.icons[JSMM.popupTargetIcon];
+	$('#iconSelect').css({left:target.x, top:target.y}).show().focus();
+    },
+    selectIconEnd : function(e){
+	$('#iconSelect').hide();
+	JSMM.popupTarget.icons[JSMM.popupTargetIcon] = e.selectedIndex;
+	JSMM.popupTarget.updateIcons();
+	JSMM.updatePositions();
+	return false;
+    },
+    handleClickInside : function(e){
+	JSMM.hidePopup();
+	var node = nodes[/s([0-9]+)/.exec($(e.currentTarget).parent()[0].id)[1]];
+	console.log('node', node);
+	var popup = JSMM.popup = $('#popup');
+	JSMM.popupPos = {left:e.pageX, top:e.pageY};
+	popup.css({left:e.pageX-popup.width()/2, top:e.pageY-popup.height()/2}).show();
+	JSMM.popupTarget = node;
+	return false;
+    },
+    handleEdit : function(target) {
+	JSMM.hidePopup();
+	JSMM.popupTarget = target = target || JSMM.popupTarget;
+	$('#popupInput').children()[0].value = target.getInside();
+	$('#popupInput').css({left:target.x, top:target.y}).show().children().focus();
+	return false;
+    },
+    textChanged : function(elem) {
+	$('#popupInput').hide();
+	JSMM.popupTarget.updateInside(elem.value);
+	JSMM.updatePositions();
+	return false;
+    },
+    removeNode : function(target) {
+	JSMM.hidePopup();
+	JSMM.yankBuffer = JSMM.popupTarget;
+	JSMM.popupTarget.remove();
+	JSMM.updatePositions(true);
+	return false;
+    },
+    recycleNode : function(e) {
+	JSMM.hidePopup();
+	var popup = JSMM.popup = $('#recyclePopup');
+	var pos = JSMM.popupPos;
+	popup.css({top:pos.top-popup.height()/2, left:pos.left-JSMM.popupSize/2}).show();
+	return false;
+    },
+    recycleNodeTBC : function(dir) {
+	console.log('recycle', JSMM.yankBuffer, dir);
+	JSMM.hidePopup();
+	if(JSMM.yankBuffer){
+	    if(dir==0){
+		JSMM.popupTarget.insertChild(JSMM.yankBuffer);
+	    }else{
+		JSMM.popupTarget.insertSibling(dir, JSMM.yankBuffer);
+	    }
+	    JSMM.yankBuffer.elem.show();;
+	    JSMM.yankBuffer = null;
+	    JSMM.updatePositions();
+	}else{
+	    alert("Yank buffer is empty.");
+	}
+    },
+    handleIcon : function(icon) {
+	JSMM.hidePopup();
+	JSMM.popupTarget.addIcon(icon||82);
+	JSMM.updatePositions();
+	return false;
+    },
+    handlePopupAddT : function(){
+	JSMM.hidePopup();
+	var c = JSMM.popupTarget.addSibling(-1);
+	JSMM.updatePositions();
+	JSMM.handleEdit(c);
+	return false;
+    },
+    handlePopupAddB : function(){
+	JSMM.hidePopup();
+	var c = JSMM.popupTarget.addSibling(1);
+	JSMM.updatePositions();
+	JSMM.handleEdit(c);
+	return false;
+    },
+    handlePopupAddR : function(){
+	var c = JSMM.popupTarget.addChild();
+	JSMM.updatePositions();
+	//JSMM.popupTarget.updateHeight();JSMM.popupTarget.updatePositions();
+	JSMM.handleEdit(c);
+	return false;
+    },
+    handlePopupToggle : function(){
+	JSMM.hidePopup();
+	var c = JSMM.popupTarget.toggleChildren();
+	JSMM.updatePositions(true);
+	return false;
+    },
+    setupNodeAttr : function(n){
+	n = (n || $('.s'))
+	n.children('.inside').click(JSMM.handleClickInside);
+	n.children('.inside').attr('contenteditable', 'true'); // don't remove this.
+    },
+    showNodes : function(){
+	// add nodes
+	var html = []
+	for(var index in nodes){
+	    html.push(nodes[index].html());
+	}
+	$('#graph')[0].innerHTML = html.join('');
+	JSMM.setupNodeAttr();
+
+	JSMM.updateElem();
+    },
+    drawCanvas : function(){
+	var canvas = $('#graphCanvas');
+	var graphBox = $('#graphBox');
+	var ctx = canvas[0].getContext('2d');
+	ctx.clearRect(0, 0, canvas.width(), canvas.height());
+	ctx.strokeStyle = '#AAAAFF';
+	drawChild = function(node) {
+	    var w = 4;
+	    var sx = node.x + node.w + w;
+	    var sy = node.y + node.height/2;
+	    var y0 = sy - node.h/2;
+	    var y1 = sy + node.h/2;
+	    var x0 = node.x-w;
+	    if(false){
+		ctx.beginPath();
+		ctx.moveTo(x0, sy);
+		ctx.quadraticCurveTo(x0, y0, node.x, y0);
+		ctx.lineTo(sx-w, y0);
+		ctx.quadraticCurveTo(sx, y0, sx, sy);
+		ctx.quadraticCurveTo(sx, y1, sx-w, y1);
+		ctx.lineTo(x0+w, y1);
+		ctx.quadraticCurveTo(x0, y1, x0, sy);
+		ctx.stroke();
+	    }
+	    node.eachChild(function(c){
+		if(c.visible){
+		    var ex = c.x-w;
+		    var ey = c.y + c.height/2;
+		    var x1 = sx+(ex-sx)*0.8;
+		    var x2 = sx+(ex-sx)*0.2;
+		    ctx.beginPath();
+		    ctx.moveTo(sx, sy);
+		    ctx.bezierCurveTo(x1, sy, x2, ey, ex, ey);
+		    ctx.stroke();
+		    drawChild(c);
+		}else{
+		    ctx.beginPath();
+		    ctx.moveTo(sx, sy);
+		    ctx.lineTo(sx+Node.wmargin, sy);
+		    ctx.stroke();
+		}
+	    });
+	}
+	drawChild(nodes['0']);
+    },
+    // dialog
+    showDialog : function(html){
+	$('#dialogMessage')[0].innerHTML = html;
+	$('#dialog').show();
+    },
+    hideDialog : function(){
+	$('#dialog').hide();
+    },
+    // disable/enable
+    disable : function(){
+	$('.mmi').attr('disabled', 'disabled');
+	//$('span.s').children('.inside').attr('contenteditable', 'false');
+    },
+    enable : function(){
+	JSMM.setupNodeAttr(); // content editable and event setup
+	$('.mmi').removeAttr('disabled');
+    },
+    // icon selector
+    iconTable : null,
+    iconSize : 24,
+    numIcons : 102,
+    showIconPopup : function(ev){
+	console.log('showIconPopup', ev);
+	var cols = 8;
+	if(!JSMM.iconTable){
+	    JSMM.iconTable = $('#iconTable');
+	    html = []
+	    for(var i=0; i<JSMM.numIcons; i+=8){
+		html.push('<tr>')
+		for(var j=0; j<8 && i+j<JSMM.numIcons; ++j){
+		    html.push('<td ><div class="icon">'+
+			      '<img id="pic'+(i+j)+'" class="pic" src="SnowIcons.png" width=24px height=2448px />'+
+			      '</div></td>');
+		}
+		html.push('</tr>')
+	    }
+	    JSMM.iconTable[0].innerHTML = html.join('')
+	    for(var i=0; i<JSMM.numIcons; i++){
+		$('#pic'+i).css({'margin-top':-24*i});
+	    }
+	}
+	var x = ev.pageX, y = ev.pageY;
+	$('#iconPopup').css({left:ev.pageX, top:ev.pageY}).show();
+    },
+    // initialize
+    initialize : function(){
+	// event handler
+	$('#iconMenu').mousedown(JSMM.showIconPopup);
+	// root node
+	JSMM.createRoot();
+	JSMM.createSample();
+	JSMM.showNodes();
+	JSMM.updatePositions();
+	JSMM.selectFileUpdate();
+    }
+};
+
+// util
+function newId(map){
+    var i = Math.floor(Math.random()*100000);
+    for(; map[i]; ++i);
+    return i.toString();
+}
+
+/// id to node map : ToDo use namespace ?
+var nodes = {};
+
+/// class Node
+function Node(id){
+    // initialize
+    if(!id) id = newId(nodes);
+    this.node = id;
+    this.children = [];
+    this.visible = true;
+    this.body = defaultBody;
+    this.record = null;
+    this.icons = [];
+    nodes[id] = this;
+}
+Node.prototype.serializeAttr = function(f){
+    if(window['JSON']){
+	return JSON.stringify({
+	    node: this.node,
+	    children: this.children,
+	    visible: this.visible,
+	    icons: this.icons,
+	});
+    }else{
+	return '{"node":"'+this.node+'","children":['+this.children.join(",")+
+	    '],"visible":'+this.visible.toString()+',"icons":['+this.icons.join(',')+']'
+    }
+}
+Node.prototype.storeRecord = function(entry){
+    this.record = entry;
+    this.recordAttr = this.serializeAttr();
+}
+Node.prototype.changed = function(body){
+    return (this.body != body || this.recordAttr != this.serializeAttr());
+}
+Node.prototype.eachChild = function(f){
+    this.children.each(function(cid){ f(nodes[cid]); });
+}
+Node.prototype.eachVisibleChild = function(f){
+    this.children.each(function(cid){
+	var c = nodes[cid];
+	if(c.visible) f(c);
+    });
+}
+Node.prototype.html = function(){
+    //return ('<div class="s" id="s'+this.node+'">'+
+    //    '<span class="inside">'+this.body+'</span>'+
+    //    '</div>');
+    return (//'<div class="a al" id="l'+this.node+'"></div>'+
+	    //'<div class="a ar" id="r'+this.node+'"></div>'+
+	    //'<div class="a at" id="t'+this.node+'"></div>'+
+	    //'<div class="a ab" id="b'+this.node+'"></div>'+
+	    '<table border=0 cellspacing=0 cellpadding=0>' + 
+	    '<tr class="s" id="s'+this.node+'"><td class="icond"></td><td class="inside">'+this.body+'</td></tr>'+
+	    '</table>');
+}
+Node.prototype.remove = function(rel){
+    var children = nodes[this.parent].children;
+    var id = children.indexOf(this.node);
+    children.splice(id, 1);
+    this.elem.hide();
+    (nodes[children[id-1]] || nodes[this.parent]).focus();
+}
+Node.prototype.isFirstChild = function(rel){
+    if(!this.parent) return true;
+    var children = nodes[this.parent].children;
+    return children.indexOf(this.node)==0;
+}
+Node.prototype.getSibling = function(rel){
+    var children = nodes[this.parent].children;
+    return nodes[children[children.indexOf(this.node)+rel]];
+}
+Node.prototype.getParent = function(){
+    return nodes[this.parent];
+}
+Node.prototype.getChild = function(index){
+    if(index<0)
+	return nodes[this.children[this.children.length+index]];
+    else
+	return nodes[this.children[index]];
+}
+Node.prototype.addChild = function(){
+    this.visible = true;
+    c = new Node();
+    this.children.push(c.node);
+    c.parent = this.node;
+    $('#graph').append(c.html());
+    c.setupAttr();
+    return c;
+}
+Node.prototype.addSibling = function(dir){
+    if(this.parent){
+	c = new Node();
+	children = nodes[this.parent].children
+	children.splice(children.indexOf(this.node)+(dir>0 ? 1:0), 0, c.node);
+	c.parent = this.parent;
+	$('#graph').append(c.html());
+	c.setupAttr();
+	return c;
+    }
+}
+Node.prototype.insertChild = function(node){
+    if(this.parent){
+	this.children.push(node.node);
+	node.parent = this.node;
+    }
+}
+Node.prototype.insertSibling = function(dir, node){
+    if(this.parent){
+	children = nodes[this.parent].children
+	children.splice(children.indexOf(this.node)+(dir>0 ? 1:0), 0, node.node);
+	node.parent = this.parent;
+    }
+}
+Node.prototype.setupAttr = function(dir){
+    this.updateElem();
+    JSMM.setupNodeAttr(this.elem);
+}
+Node.prototype.toggle = function(f){
+    this.visible = !this.visible;
+}
+Node.prototype.toggleChildren = function(f){
+    this.eachChild(function(c){c.toggle()});
+}
+
+Node.wmargin = 16;
+Node.hmargin = 10;
+Node.infocus = null;
+Node.prototype.focus = function(){
+    this.elem.children('.inside').focus();
+    Node.infocus = this;
+}
+Node.prototype.getInside = function(){
+    return this.elem.children('.inside')[0].innerHTML;
+}
+Node.prototype.updateInside = function(text){
+    this.elem.children('.inside')[0].innerHTML = text;
+    this.css = null; this.elem.css({top:0,left:0}); // avoid overflow
+    this.updateSize();
+}
+Node.prototype.updateSize = function(){
+    this.w = this.elem.width();
+    this.h = this.elem.children('.inside').height();
+}
+Node.prototype.getW = function(){
+    if(!this.w) this.w = this.elem.width();
+    return this.w;
+}
+Node.prototype.getH = function(){
+    if(!this.h) this.h = this.elem.children('.inside').height();
+    return this.h;
+}
+Node.prototype.updateElem = function(){
+    this.elem = $('#s'+this.node);
+    if(this.node!='0') this.elem.hide();
+    return this;
+}
+var padx=12;
+var pady=12;
+Node.prototype.updateCSS = function(){
+    var y = this.y + (this.height-this.h)/2
+    if(!this.css || (this.css.x!=this.x || this.css.y!=y)){
+	this.elem.css({top: y, left: this.x});
+	this.css = {x:this.x, y:y}; // save position
+    }
+}
+Node.prototype.updateHeight = function(){
+    var height = -Node.hmargin;
+    this.elem.show();
+    this.eachVisibleChild(function(c){
+	height += Node.hmargin + c.updateHeight();
+    });
+    this.height = Math.max(height, this.getH());
+    return this.height;
+}
+Node.prototype.updatePositions = function(){
+    var x0 = this.x + this.getW() + Node.wmargin;
+    Node.width = Math.max(Node.width, x0);
+    var y0 = this.y;
+    this.eachVisibleChild(function(c){
+	c.x = x0;
+	c.y = y0;
+	y0 += c.height + Node.hmargin;
+	c.updatePositions();
+	c.updateCSS();
+    });
+}
+Node.prototype.updatePositionsX = function(){
+    this.w = this.elem.width();
+    var x0 = this.x + this.w + Node.wmargin;
+    this.eachVisibleChild(function(c){
+	c.x = x0;
+	c.updateCSS();
+	c.updatePositionsX();
+    });
+}
+// icon
+Node.prototype.addIcon = function(icon){
+    this.icons.push(icon);
+    this.updateIcons();
+    this.updateSize();
+}
+Node.prototype.removeIcon = function(index){
+    this.icons.splice(index, 1);
+    this.updateIcons();
+    this.updateSize();
+}
+Node.prototype.updateIcons = function(){
+    console.log(this.icons);
+    html = ['<table border=0 cellspacing=0 cellpadding=0>']
+    this.icons.each(function(index){
+	html.push('<td><div class="icon24"><img class="ic'+index+'" src="SnowIcons.png" width=24px height=2448px style="margin-top:-'+index*24+'px;" /></div></td>')
+    });
+    html.push('</table>')
+    this.elem.children('.icond')[0].innerHTML = html.join('');
+    this.elem.children('.icond').find('.icon24').click(JSMM.handleClickIcon)
+}
+
+// dialogUtil
+var currentDialog = null;
+function showDialog(dlg){
+    JSMM.disable();
+    currentDialog = dlg;
+    $(dlg).show();
+}
+function hideDialog(){
+    $(currentDialog).hide();
+    JSMM.enable();
+}
+
+--></script>
+</head>
+<div id='root'>
+  <div id='graphBoxWrap' onclick='JSMM.handleBgTouch()'>
+    <div id='graphBox' onclick='JSMM.handleBgTouch()'>
+      <canvas id='graphCanvas'></canvas><div id='graph'></div>
+    </div>
+    <div class='lmenuBox transp8'>
+      <!--<button class='mmi debug' onclick='location.reload();'>Reload</button>-->
+      <button class='mmi' id='openButton' onclick='JSMM.selectFile();'>Open ...</button>
+      <button class='mmi' onclick='JSMM.save();'>Save</button>
+      <button class='mmi' onclick='JSMM.saveAsNewDocument();'>Save As ...</button>
+      <!--<button class='mmi debug' onclick='JSMM.updatePositions(true);'>Redraw</button>-->
+    </div>
+  </div>
+  
+  <div id='dialog' class='dialog'><div class='dialogWrap'><div class='dialogContent'>
+	<div class='dialogTitle'></div>
+	<div class='dialogButton'></div>
+	<div id='dialogMessage' class='dialogMain'></div>
+  </div></div></div>
+  
+  <div id='popupInput' class='popup'>
+    <input type='text' value='' onblur='JSMM.textChanged(this)'>
+  </div>
+  <div id='popup' class='popup'><table border=0 cellspacing=0 cellpadding=0>
+      <tr>
+	<td><div class="iconB0" ><img class="iremove" src="SnowIcons.png" />
+            <button class="iconB1" onclick='JSMM.removeNode()'></button></div></td>
+	<td><div class="iconB0" ><img class="iadd" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.handlePopupAddT()'></button></div></td>
+	<td><div class="iconB0" ><img class="irecycle" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.recycleNode()'></button></div></td>
+      </tr>
+      <tr>
+	<td><div class="iconB0" ><img class="iicon" src="SnowIcons.png" />
+            <button class="iconB1" onclick='JSMM.handleIcon()'></button></div></td>
+	<td><div class="iconB0" ><img class="iedit" src="SnowIcons.png" />
+            <button class="iconB1" onclick='JSMM.handleEdit()'></button></div></td>
+	<td><div class="iconB0" ><img class="iadd" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.handlePopupAddR()'></button></div></td>
+      </tr>
+      <tr>
+	<td></td>
+	<td><div class="iconB0" ><img class="iadd" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.handlePopupAddB()'></button></div></td>
+    <td><div class="iconB0" ><img class="itoggle" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.handlePopupToggle()'></button></div></td>
+      </tr>
+  </table></div>
+  <div id='iconPopup' class='popup'><table border=0 cellspacing=0 cellpadding=0>
+      <tr>
+	<td><div class="iconB0" ><img class="iremove" src="SnowIcons.png" />
+            <button class="iconB1" onclick='JSMM.removeIcon()'></button></div></td>
+	<td><div class="iconB0" ><img class="iinfo" src="SnowIcons.png" />
+            <button class="iconB1" onclick='JSMM.selectIcon()'></button></div></td>
+      </tr>
+  </table></div>
+  <div id='recyclePopup' class='popup'><table border=0 cellspacing=0 cellpadding=0>
+      <tr>
+	<td><div class="iconB0" ><img class="iadd" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.recycleNodeTBC(-1)'></button></div></td>
+      </tr>
+      <tr>
+	<td></td>
+	<td><div class="iconB0" ><img class="iadd" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.recycleNodeTBC(0)'></button></div></td>
+      </tr>
+      <tr>
+	<td><div class="iconB0" ><img class="iadd" src="SnowIcons.png" />
+	    <button class="iconB1" onclick='JSMM.recycleNodeTBC(1)'></button></div></td>
+      </tr>
+  </table></div>
+  <select id='docSelect' class='popup' onblur='JSMM.selectFileEnd(this)'>
+    <option>New Document ...
+  </select>
+  <select id='iconSelect' class='popup' onblur='JSMM.selectIconEnd(this)'>
+<option>ABC
+<option>Accessibility
+<option>Add
+<option>Alarm
+<option>Alienware
+<option>Angry
+<option>Annoyed
+<option>Apple2
+<option>BBC
+<option>BioHazard
+<option>Blender
+<option>Bomb
+<option>Bunny
+<option>CBS
+<option>Car
+<option>Carrot
+<option>Cat
+<option>Cellphone
+<option>Check
+<option>Chess
+<option>Cloud
+<option>Creative Commons
+<option>Delete
+<option>Deviantart
+<option>Dice
+<option>Down
+<option>Dragon
+<option>Dragon2
+<option>Duck
+<option>Echo
+<option>Explorer
+<option>Fastfroward
+<option>Female
+<option>Firewire
+<option>Fish
+<option>Flame
+<option>Flower
+<option>Fork
+<option>Ghost
+<option>Girl
+<option>Hammy
+<option>Hamster
+<option>Happy
+<option>Heart
+<option>ICQ
+<option>Information
+<option>Key
+<option>King
+<option>Leaf
+<option>Left
+<option>Mac
+<option>Male
+<option>Mickey
+<option>Monitor
+<option>Moon
+<option>NBC
+<option>Nature
+<option>Pause
+<option>Paw
+<option>Pen
+<option>Pin
+<option>Plane
+<option>Plant
+<option>Play
+<option>Pointer
+<option>Power
+<option>Puzzle
+<option>Queen
+<option>Quicktime
+<option>RSS
+<option>Radioactive
+<option>Rain
+<option>Record
+<option>Recycle
+<option>Reset
+<option>Rewind
+<option>Right
+<option>Sad
+<option>Search
+<option>Settings
+<option>Skull
+<option>Spade
+<option>Star
+<option>Star2
+<option>Stop
+<option>Strawberry
+<option>Sunny
+<option>Superman
+<option>Suprise
+<option>TV
+<option>Telephone
+<option>Terminal
+<option>Tools
+<option>Toxic
+<option>Train
+<option>Twitter
+<option>Unbutu
+<option>Up
+<option>User
+<option>Weather
+<option>Windows
+<option>iPod Nano
+  </select>
+</div>
+    
+<img src="mypic.gif" style="visibility: hidden;">
+<script type="text/javascript">
+  JSMM.initialize();
+</script>
