@@ -781,7 +781,7 @@ var JSMM = {
 	JSMM.createSample();
 	JSMM.showNodes();
 	JSMM.updatePositions();
-	//setTimeout(JSMM.selectFileUpdate, 500);
+	//JSMM.selectFileUpdate(); // NG for Auth.
     }
 };
 
@@ -1038,7 +1038,6 @@ function hideDialog(){
 	  test: true // test mode, set to false if non-test mode
       };
       </script>
-      <script type="text/javascript" src="http://mm.admob.com/static/iphone/iadmob.js"></script>
       <!--<button class='mmi debug' onclick='location.reload();'>Reload</button>-->
       <button class='mmi' id='openButton' onclick='JSMM.selectFile();'>Open ...</button>
       <button class='mmi' onclick='JSMM.save();'>Save</button>
