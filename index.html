@@ -554,11 +554,17 @@ var JSMM = {
 	$('#docSelect').hide();
 	if(e.selectedIndex==0){
 	    var r = window.prompt("Are you sure to open a new document ?", "NewDocument");
-	    if(r)JSMM.createNewDocument(r.toString());
+	    if(r)
+		JSMM.createNewDocument(r.toString());
+	    else
+		JSMM.selectFileUpdate();
 	}else{
 	    console.log(e[e.selectedIndex])
-	    var r = window.confirm("Are you sure to open '"+e[e.selectedIndex].innerText+"'");
-	    JSMM.openDocument(e[e.selectedIndex].value);
+	    if(window.confirm("Are you sure to open '"+e[e.selectedIndex].innerText+"'")){
+		JSMM.openDocument(e[e.selectedIndex].value);
+	    }else{
+		JSMM.selectFileUpdate();
+	    }
 	}
     },
     selectIcon : function(){
@@ -774,7 +780,7 @@ var JSMM = {
 	JSMM.createSample();
 	JSMM.showNodes();
 	JSMM.updatePositions();
-	JSMM.selectFileUpdate();
+	//JSMM.selectFileUpdate();
     }
 };
 
