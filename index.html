@@ -547,6 +547,7 @@ var JSMM = {
 	}, defaultErrorHandler);
     },
     selectFile : function(){
+	JSMM.selectFileUpdate();
 	var pos = $('#openButton').position();
 	$('#docSelect').css({left:pos.left, top:pos.top}).show().focus();
     },
@@ -780,7 +781,7 @@ var JSMM = {
 	JSMM.createSample();
 	JSMM.showNodes();
 	JSMM.updatePositions();
-	//JSMM.selectFileUpdate();
+	setTimeout(JSMM.selectFileUpdate, 500);
     }
 };
 
@@ -1029,6 +1030,15 @@ function hideDialog(){
       <canvas id='graphCanvas'></canvas><div id='graph'></div>
     </div>
     <div class='lmenuBox transp8'>
+      <script type="text/javascript">
+      var admob_vars = {
+	  pubid: 'a14b8c22d2ac541', // publisher id
+	  bgcolor: 'D9E3EC', // background color (hex)
+	  text: '4C586A', // font-color (hex)
+	  test: true // test mode, set to false if non-test mode
+      };
+      </script>
+      <script type="text/javascript" src="http://mm.admob.com/static/iphone/iadmob.js"></script>
       <!--<button class='mmi debug' onclick='location.reload();'>Reload</button>-->
       <button class='mmi' id='openButton' onclick='JSMM.selectFile();'>Open ...</button>
       <button class='mmi' onclick='JSMM.save();'>Save</button>
